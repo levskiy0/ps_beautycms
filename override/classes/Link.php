@@ -7,6 +7,34 @@
 class Link extends LinkCore
 {
     /**
+     * Generate CMS category URL with support for index pages
+     *
+     * @param mixed $category
+     * @param string|null $alias
+     * @param bool|null $ssl
+     * @param int|null $id_lang
+     * @param int|null $id_shop
+     * @param bool $relative_protocol
+     * @return string
+     */
+    public function getCMSCategoryLink($category, $alias = null, $ssl = null, $id_lang = null, $id_shop = null, $relative_protocol = false)
+    {
+        $id_category = is_object($category) ? (int) $category->id : (int) $category;
+
+        $row = Db::getInstance()->getRow('
+            SELECT id_cms
+            FROM `' . _DB_PREFIX_ . 'cms_pretty_category`
+            WHERE id_category = ' . (int) $id_category
+        );
+
+        if ($row && isset($row['id_cms']) && (int) $row['id_cms'] > 0) {
+            return $this->getCMSLink((int) $row['id_cms'], null, $ssl, $id_lang, $id_shop, $relative_protocol);
+        }
+
+        return parent::getCMSCategoryLink($category, $alias, $ssl, $id_lang, $id_shop, $relative_protocol);
+    }
+
+    /**
      * Generate CMS page URL with support for pretty URLs
      *
      * @param mixed $cms CMS object or ID
