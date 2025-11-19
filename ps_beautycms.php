@@ -14,6 +14,7 @@ if (!defined('_PS_VERSION_')) {
 class Ps_BeautyCMS extends Module
 {
     protected $dbPrefix;
+    private $isResetting = false;
 
     public function __construct()
     {
@@ -53,8 +54,30 @@ class Ps_BeautyCMS extends Module
 
     public function uninstall()
     {
+        if ($this->isResetting) {
+            return parent::uninstall();
+        }
+
         return parent::uninstall()
             && $this->uninstallDb();
+    }
+
+    public function reset()
+    {
+        $this->isResetting = true;
+
+        if (!$this->uninstall()) {
+            $this->isResetting = false;
+            return false;
+        }
+
+        if (!$this->install()) {
+            $this->isResetting = false;
+            return false;
+        }
+
+        $this->isResetting = false;
+        return true;
     }
 
     protected function installDb()
