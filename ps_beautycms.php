@@ -69,13 +69,16 @@ class Ps_BeautyCMS extends Module
         $this->isResetting = true;
 
         if (!$this->uninstall()) {
+            $this->isResetting = false;
             return false;
         }
 
         if (!$this->install()) {
+            $this->isResetting = false;
             return false;
         }
 
+        $this->isResetting = false;
         return true;
     }
 
