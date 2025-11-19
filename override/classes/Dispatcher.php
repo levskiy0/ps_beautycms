@@ -25,6 +25,8 @@ class Dispatcher extends DispatcherCore
             $id_shop = (int) $context->shop->id;
         }
 
+        $defaultLangId = (int) Configuration::get('PS_LANG_DEFAULT');
+
         $rows = Db::getInstance()->executeS('
             SELECT id_cms, id_lang, pretty_url
             FROM `' . _DB_PREFIX_ . 'cms_pretty_routes`
@@ -36,26 +38,43 @@ class Dispatcher extends DispatcherCore
             return;
         }
 
+        $urlsByPage = [];
         foreach ($rows as $row) {
             $idCms = (int) $row['id_cms'];
             $idLang = (int) $row['id_lang'];
             $prettyUrl = ltrim($row['pretty_url'], '/');
 
-            if (empty($prettyUrl)) {
+            if (!empty($prettyUrl)) {
+                $urlsByPage[$idCms][$idLang] = $prettyUrl;
+            }
+        }
+
+        $languages = Language::getLanguages(true, $id_shop);
+
+        foreach ($urlsByPage as $idCms => $langUrls) {
+            $defaultUrl = isset($langUrls[$defaultLangId]) ? $langUrls[$defaultLangId] : null;
+
+            if (!$defaultUrl) {
                 continue;
             }
 
-            $routeId = 'cms_pretty_url_' . $idCms . '_' . $idLang;
+            foreach ($languages as $language) {
+                $idLang = (int) $language['id_lang'];
 
-            $this->addRoute(
-                $routeId,
-                $prettyUrl,
-                'cms',
-                $idLang,
-                [],
-                ['id_cms' => $idCms],
-                $id_shop
-            );
+                $prettyUrl = isset($langUrls[$idLang]) ? $langUrls[$idLang] : $defaultUrl;
+
+                $routeId = 'cms_pretty_url_' . $idCms . '_' . $idLang;
+
+                $this->addRoute(
+                    $routeId,
+                    $prettyUrl,
+                    'cms',
+                    $idLang,
+                    [],
+                    ['id_cms' => $idCms],
+                    $id_shop
+                );
+            }
         }
     }
 }

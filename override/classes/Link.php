@@ -26,12 +26,33 @@ class Link extends LinkCore
                 $id_lang = (int) Context::getContext()->language->id;
             }
 
-            $row = Db::getInstance()->getRow('
-                SELECT use_pretty_url, pretty_url
+            $defaultLangId = (int) Configuration::get('PS_LANG_DEFAULT');
+
+            $rows = Db::getInstance()->executeS('
+                SELECT id_lang, use_pretty_url, pretty_url
                 FROM `' . _DB_PREFIX_ . 'cms_pretty_routes`
                 WHERE id_cms = ' . (int) $id_cms . '
-                  AND id_lang = ' . (int) $id_lang
-            );
+                  AND id_lang IN (' . (int) $id_lang . ', ' . (int) $defaultLangId . ')
+            ');
+
+            $row = null;
+            if ($rows) {
+                foreach ($rows as $r) {
+                    if ((int) $r['id_lang'] === $id_lang && (int) $r['use_pretty_url'] === 1 && !empty($r['pretty_url'])) {
+                        $row = $r;
+                        break;
+                    }
+                }
+
+                if (!$row) {
+                    foreach ($rows as $r) {
+                        if ((int) $r['id_lang'] === $defaultLangId && (int) $r['use_pretty_url'] === 1 && !empty($r['pretty_url'])) {
+                            $row = $r;
+                            break;
+                        }
+                    }
+                }
+            }
 
             if (!empty($row) && (int) $row['use_pretty_url'] === 1 && !empty($row['pretty_url'])) {
                 $customUrl = ltrim($row['pretty_url'], '/');
