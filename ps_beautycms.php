@@ -316,7 +316,7 @@ class Ps_BeautyCMS extends Module
         $output .= '</ul>';
         $output .= '<p><strong>' . $this->l('Note:') . '</strong> ' . $this->l('Make sure "Friendly URL" is enabled in Shop Parameters > Traffic & SEO') . '</p>';
         $output .= '<br/>';
-        $output .= '<p>' . $this->l('Need help with your Prestashop? Contact with me: ') . '<a href="mailto:40x.Pro@gmail.com">40x.Pro@gmail.com</a>, <a href="https://github.com/levskiy0">GitHub</a> </p>';
+        $output .= '<p><strong>' . $this->l('Need help with your Prestashop? Contact with me:') . '</strong> <a href="mailto:40x.Pro@gmail.com">40x.Pro@gmail.com</a>, <a href="https://github.com/levskiy0">GitHub</a> </p>';
         $output .= '</div>';
 
         return $output;
